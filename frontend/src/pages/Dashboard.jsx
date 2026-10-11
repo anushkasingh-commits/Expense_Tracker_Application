@@ -11,16 +11,28 @@ function Dashboard({ user }) {
   const [category, setCategory] = useState('all');
   const [search, setSearch] = useState('');
   const [sortBy, setSortBy] = useState('newest');
+  const [fromDate, setFromDate] = useState('');
+  const [toDate, setToDate] = useState('');
   const [editingExpense, setEditingExpense] = useState(null);
 
   useEffect(() => {
+    if (fromDate && toDate && fromDate > toDate){
+      setError('"From" date cannot be after "To" date');
+      return;
+    }
     loadExpenses();
-  }, []);
+  }, [fromDate, toDate]);
 
   async function loadExpenses() {
     try {
-      const data = await apiRequest('/expenses');
+      const params = new URLSearchParams();
+      if (fromDate) params.set('from', fromDate);
+      if (toDate) params.set('to', toDate);
+      const query = params.toString();
+
+      const data = await apiRequest(`/expenses${query ? `?${query}` : ''}`);
       setExpenses(data);
+      setError('');
       setLoading(false);
     } catch (err) {
       setError(err.message);
@@ -30,8 +42,8 @@ function Dashboard({ user }) {
 
   const handleAdd = async (expenseData) => {
     try {
-      const newExpense = await apiRequest('/expenses', 'POST', expenseData);
-      setExpenses((prev) => [newExpense, ...prev]);
+      await apiRequest('/expenses', 'POST', expenseData);
+      await loadExpenses();
     } catch (err) {
       setError(err.message);
     }
@@ -39,10 +51,8 @@ function Dashboard({ user }) {
 
   const handleUpdate = async (id, expenseData) => {
     try {
-      const updated = await apiRequest(`/expenses/${id}`, 'PUT', expenseData);
-      setExpenses((prev) =>
-        prev.map((exp) => (exp._id === id ? updated : exp))
-      );
+      await apiRequest(`/expenses/${id}`, 'PUT', expenseData);
+      await loadExpenses();
       setEditingExpense(null);
     } catch (err) {
       setError(err.message);
@@ -62,18 +72,20 @@ function Dashboard({ user }) {
     }
   };
 
-  const visibleExpenses = expenses.filter((exp) => {
-    const matchesCategory =
-      category === 'all' || exp.category === category;
+  const clearDates = () => {
+    setFromDate('');
+    setToDate('');
+  };
 
+  const visibleExpenses = expenses.filter((exp) => {
+    const matchesCategory = category === 'all' || exp.category === category;
     const matchesSearch = (exp.title || '')
       .toLowerCase()
       .includes(search.trim().toLowerCase());
-
     return matchesCategory && matchesSearch;
   });
 
-  const total = visibleExpenses.reduce((sum, exp) => sum + exp.amount, 0);
+  const total = visibleExpenses.reduce((sum, exp) => sum + Number(exp.amount), 0);
 
   const sortedExpenses = [...visibleExpenses].sort((a, b) => {
     if (sortBy === 'newest') {
@@ -124,6 +136,22 @@ function Dashboard({ user }) {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
+
+          <div style={{display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap'}}>
+      <label>
+        From: {' '}
+        <input type="date" value={fromDate} onChange={(e) => setFromDate(e.target.value)} />
+      </label>
+      <label>
+        To: {' '}
+        <input type="date" value={toDate} onChange={(e) => setToDate(e.target.value)} />
+      </label>
+        {(fromDate || toDate) && (
+          <button type='button' onClick={clearDates}>
+            Clear dates
+          </button>
+        )}
+      </div>
 
         <div>
           <h3>Total: ${total.toFixed(2)}</h3>

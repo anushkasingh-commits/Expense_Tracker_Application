@@ -4,15 +4,37 @@ const Expense = require('../models/Expense');
 // Admin sees every user's expenses, a regular User sees only their own
 const getExpenses = async (req, res, next) => {
   try {
-    let expenses;
+    const filter = req.user.role === 'admin' ? {} : {user: req.user._id};
+    const { from, to } = req.query;
+    if (from || to) {
+      filter.date = {};
+      if (from) {
+        const fromDate = new Date(`${from}T00:00:00.000Z`);
+        if (isNaN(fromDate.getTime())) {
+          res.status(400);
+          throw new Error('Invalid "from" date');
+        }
+        filter.date.$gte = fromDate;
+      }
 
-    if (req.user.role === 'admin') {
-      expenses = await Expense.find().populate('user', 'name email');
-    } else {
-      expenses = await Expense.find({ user: req.user._id });
+      if (to) {
+        const toDate = new Date(`${to}T23:59:59.999Z`);
+        if (isNaN(toDate.getTime())) {
+          res.status(400);
+          throw new Error('Invalid "to" date');
+        }
+        filter.date.$lte = toDate;
+      }
+      if (from && to && filter.date.$gte > filter.date.$lte) {
+        res.status(400);
+        throw new Error('"From" date cannot be after "To" date');
+      }
     }
-
-    res.json(expenses);
+    let query = Expense.find(filter);
+    if (req.user.role === 'admin') {
+      query = query.populate('user', 'name email');
+    }
+    res.json(await query);
   } catch (error) {
     next(error);
   }
