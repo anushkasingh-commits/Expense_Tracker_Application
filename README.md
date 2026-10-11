@@ -87,15 +87,11 @@ VITE_API_URL=http://localhost:5000/api
 
 Never commit `.env` — only `.env.example` is tracked in Git.
 
-## Screenshots
-
-_Add screenshots here once the app is running (Dashboard, Login, Add Expense form)._
-
 ## Deployment links
 
-- GitHub Repository: _Fill in_
-- Frontend (Vercel): _Fill in_
-- Backend: _Fill in_
+- GitHub: https://github.com/anushkasingh-commits/Expense_Tracker_Application
+- Frontend (Vercel): https://expense-tracker-application-red-ten.vercel.app/
+- Backend (Render): https://expense-tracker-backend-k8ce.onrender.com/
 
 ## Git workflow
 
@@ -103,4 +99,3 @@ _Add screenshots here once the app is running (Dashboard, Login, Add Expense for
 - Each member works on their own branch, e.g. `feature/expense-crud`, `feature/auth`, `feature/dashboard`
 - Open a Pull Request into `main` for review before merging
 - Each member needs at least 2 meaningful merged PRs
-# Expense_Tracker_Application
