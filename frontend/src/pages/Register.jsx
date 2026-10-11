@@ -6,7 +6,6 @@ function Register({ onLogin }) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [role, setRole] = useState('user');
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
@@ -15,7 +14,7 @@ function Register({ onLogin }) {
     setError('');
 
     try {
-      const data = await apiRequest('/auth/register', 'POST', { name, email, password, role });
+      const data = await apiRequest('/auth/register', 'POST', { name, email, password });
       onLogin(data);
       navigate('/');
     } catch (err) {
@@ -53,11 +52,6 @@ function Register({ onLogin }) {
           onChange={(e) => setPassword(e.target.value)}
           required
         />
-
-        <select value={role} onChange={(e) => setRole(e.target.value)}>
-          <option value="user">User</option>
-          <option value="admin">Admin</option>
-        </select>
 
         <button type="submit">Register</button>
 
