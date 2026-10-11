@@ -105,7 +105,11 @@ function Dashboard({ user }) {
 
   if (user?.role === 'admin') {
     visibleExpenses.forEach((exp) => {
-      const name = exp.user?.name;
+      const name =
+        exp.user?.name ||
+        (typeof exp.user === 'string'
+          ? `User (${exp.user.slice(-4)})`
+          : 'Unknown User');
 
       if (name) {
         userTotals[name] =

@@ -32,6 +32,10 @@ const getExpenseById = async (req, res, next) => {
       return res.status(403).json({ message: 'Not allowed to view this expense' });
     }
 
+    if (req.user.role === 'admin') {
+      await expense.populate('user', 'name email');
+    }
+
     res.json(expense);
   } catch (error) {
     next(error);
@@ -51,6 +55,8 @@ const createExpense = async (req, res, next) => {
       description,
       user: req.user._id,
     });
+
+    await expense.populate('user', 'name email');
 
     res.status(201).json(expense);
   } catch (error) {
@@ -79,6 +85,7 @@ const updateExpense = async (req, res, next) => {
     expense.description = req.body.description ?? expense.description;
 
     const updatedExpense = await expense.save();
+    await updatedExpense.populate('user', 'name email');
     res.json(updatedExpense);
   } catch (error) {
     next(error);

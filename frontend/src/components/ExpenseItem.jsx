@@ -7,7 +7,7 @@ function ExpenseItem({ expense, onEdit, onDelete }) {
           <span className="category-tag">{expense.category}</span>
         </div>
 
-        <p className="amount">${expense.amount.toFixed(2)}</p>
+        <p className="amount">₹{Number(expense.amount).toFixed(2)}</p>
         <p className="date">{new Date(expense.date).toLocaleDateString()}</p>
 
         {expense.description && <p className="description">{expense.description}</p>}
